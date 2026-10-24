@@ -60,50 +60,82 @@ Las dependencias se registran en `requirements.txt`.
   - muestra información básica detectada
   - botón JUGAR deshabilitado temporalmente
 - [x] `main.py` reducido a punto de entrada de la aplicación
-- [x] La versión modular abre correctamente en el PC de desarrollo
 - [x] Detección de Windows, arquitectura y RAM confirmada
 - [x] Creación de `%LOCALAPPDATA%/MiyuLauncher` confirmada
-
-### Implementado, pendiente de validación local
-
 - [x] `core/java.py`
-  - búsqueda mediante `PATH`
-  - búsqueda mediante `JAVA_HOME`
-  - búsqueda en directorios comunes de Java para Windows
-  - ejecución segura de `java -version`
-  - lectura de versión y versión mayor
-  - eliminación de rutas duplicadas
-  - selección de una instalación Java preferida
-- [x] `tools/check_java.py`
-  - utilidad temporal para comprobar detección de Java desde consola
+  - Java 21.0.11 detectado
+  - Java 17.0.19 detectado
+  - selección por versión mayor funcionando
+- [x] `core/minecraft.py`
+  - instalación oficial detectada en `%APPDATA%/.minecraft`
+  - versiones 1.21.5 y 26.x detectadas
+  - lectura de Java requerido, assets, main class, downloads y librerías
+- [x] `core/version_resolver.py`
+  - resolución inicial de versión y compatibilidad Java
+
+### Java Runtime Manager — implementado, pendiente de validación local
+
+- [x] `core/runtime.py`
+  - runtime administrado en `%LOCALAPPDATA%/MiyuLauncher/runtime/java-<major>`
+  - consulta de Eclipse Temurin mediante API de Adoptium
+  - selección de Windows y arquitectura
+  - descarga de JRE ZIP
+  - barra/progreso mediante callback
+  - verificación SHA-256 antes de instalar
+  - extracción del runtime
+  - validación posterior ejecutando `java -version`
+  - metadata `miyu-runtime.json`
+  - reutilización de runtime ya instalado
+- [x] `tools/check_runtime.py`
+  - consulta de paquete sin instalar
+  - instalación opcional mediante `--install`
+  - reinstalación mediante `--force`
+
+## Decisión nueva sobre Java
+
+MiyuLauncher administrará sus propios runtimes Java en lugar de depender del Java instalado globalmente en Windows.
+
+Prioridad prevista:
+
+1. Runtime administrado por MiyuLauncher para la versión mayor requerida por Minecraft.
+2. Si no existe, MiyuLauncher lo descargará e instalará automáticamente.
+3. El detector de Java del sistema se conservará como diagnóstico/fallback.
+
+Ejemplos confirmados en el PC de desarrollo:
+
+- Minecraft 1.21.5 requiere Java 21.
+- Minecraft 26.x requiere Java 25.
+
+Para reducir tamaño de descarga se utilizará Eclipse Temurin JRE cuando esté disponible, ya que el launcher solo necesita ejecutar Minecraft/Fabric.
 
 ## Próximo objetivo
 
-1. Ejecutar `python tools/check_java.py` en el PC de desarrollo.
-2. Confirmar qué instalaciones y versiones de Java detecta.
-3. Corregir casos de detección si fuera necesario.
-4. Mostrar el Java seleccionado en la interfaz.
-5. Después comenzar la detección de instalaciones/versiones de Minecraft.
+1. Ejecutar `python tools/check_runtime.py 25` para confirmar que Adoptium devuelve un JRE compatible.
+2. Ejecutar `python tools/check_runtime.py 25 --install` para probar descarga, SHA-256, extracción y validación.
+3. Confirmar que aparece `%LOCALAPPDATA%/MiyuLauncher/runtime/java-25/bin/java.exe`.
+4. Integrar el runtime administrado con `version_resolver.py` para que Java 25 pase a estar disponible automáticamente para Minecraft 26.x.
+5. Retomar resolución de librerías, natives, classpath, assets y argumentos de lanzamiento.
 
-## Arquitectura actual
+## Arquitectura actual relevante
 
 ```text
 src/miyu_launcher/
-├── __init__.py
 ├── core/
-│   ├── __init__.py
 │   ├── java.py
+│   ├── minecraft.py
 │   ├── paths.py
-│   └── system.py
+│   ├── runtime.py
+│   ├── system.py
+│   └── version_resolver.py
 └── ui/
-    ├── __init__.py
     └── main_window.py
 
 tools/
-└── check_java.py
+├── check_java.py
+├── check_minecraft.py
+├── check_runtime.py
+└── check_version_resolver.py
 ```
-
-Las carpetas `auth`, `config`, `network` y `updater` se incorporarán a Git cuando contengan sus primeros módulos reales.
 
 ## Principios del proyecto
 
@@ -117,6 +149,7 @@ Las carpetas `auth`, `config`, `network` y `updater` se incorporarán a Git cuan
 8. MiyuLauncher debe poder reparar instalaciones dañadas.
 9. Descargar solo los archivos necesarios cuando sea posible.
 10. Mantener Minecraft en una instancia administrada separada de `.minecraft` cuando lleguemos a esa fase.
+11. Verificar hashes de cualquier runtime o archivo administrado antes de confiar en él.
 
 ## Decisiones importantes
 
@@ -124,7 +157,8 @@ Las carpetas `auth`, `config`, `network` y `updater` se incorporarán a Git cuan
 - GUI: PySide6 / Qt.
 - Mod loader: Fabric.
 - Plataforma inicial: Windows 10/11.
-- Java: a largo plazo, runtime administrado por MiyuLauncher.
+- Java: runtimes administrados por MiyuLauncher.
+- Proveedor inicial de runtimes: Eclipse Temurin / Adoptium.
 - Datos administrados: `%LOCALAPPDATA%/MiyuLauncher` en Windows.
 - Actualizaciones: manifest remoto + hashes SHA-256.
 - Mods: sincronización automática; algunos podrán ser opcionales.
@@ -132,11 +166,11 @@ Las carpetas `auth`, `config`, `network` y `updater` se incorporarán a Git cuan
 
 ## Problemas conocidos
 
-Ninguno confirmado actualmente.
+- El Java Runtime Manager todavía debe probarse con una descarga real de Java 25.
 
 ## Última prueba confirmada
 
-`python main.py` abre correctamente la versión modular y muestra la información del sistema esperada.
+La instalación estándar de Minecraft fue detectada correctamente. Minecraft 1.21.5 declara Java 21 y las versiones 26.x detectadas declaran Java 25.
 
 ## Cómo continuar en otra conversación
 
