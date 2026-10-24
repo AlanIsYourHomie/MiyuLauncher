@@ -1,11 +1,8 @@
 # MiyuLauncher
 
-MiyuLauncher es un launcher personalizado de Minecraft Java Edition desarrollado
-principalmente para un servidor privado entre amigos.
+MiyuLauncher es un launcher personalizado de Minecraft Java Edition desarrollado principalmente para un servidor privado entre amigos.
 
-El objetivo es proporcionar una experiencia sencilla para los jugadores,
-automatizando la preparación y mantenimiento de la instalación necesaria para
-entrar al servidor.
+El objetivo es proporcionar una experiencia sencilla para los jugadores, automatizando la preparación y mantenimiento de la instalación necesaria para entrar al servidor.
 
 ## Objetivos principales
 
@@ -40,9 +37,7 @@ La intención es que el usuario final tenga que hacer lo mínimo posible:
 
 MiyuLauncher se encuentra actualmente en desarrollo inicial.
 
-Versión actual:
-
-`0.1.0-dev`
+Versión actual: `0.1.0-dev`
 
 ## Plataformas
 
@@ -72,3 +67,27 @@ MiyuLauncher/
 ├── PROJECT_STATE.md
 ├── ROADMAP.md
 └── requirements.txt
+```
+
+## Desarrollo
+
+Instalar dependencias:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+Ejecutar:
+
+```powershell
+python main.py
+```
+
+## Autenticación
+
+MiyuLauncher no almacenará contraseñas de Microsoft. La autenticación para cuentas oficiales se implementará mediante los mecanismos oficiales de Microsoft/Minecraft.
+
+## Documentación del proyecto
+
+- `PROJECT_STATE.md`: estado exacto del desarrollo y siguiente objetivo.
+- `ROADMAP.md`: hoja de ruta completa del proyecto.
