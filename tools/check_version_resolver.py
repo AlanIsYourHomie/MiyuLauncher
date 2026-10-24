@@ -38,6 +38,7 @@ def main() -> None:
         print(f"- {resolved.version.version_id}")
         print(f"    Java requerido: {resolved.required_java_major or 'desconocido'}")
         print(f"    Java seleccionado: {java_text}")
+        print(f"    Fuente Java: {resolved.java_source or '-'}")
         print(f"    Java compatible: {_yes_no(resolved.java_compatible)}")
         print(f"    client jar presente: {_yes_no(resolved.client_jar_exists)}")
         print(f"    cliente descargable: {_yes_no(resolved.client_download_url is not None)}")
