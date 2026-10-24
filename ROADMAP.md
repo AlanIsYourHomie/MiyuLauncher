@@ -1,9 +1,15 @@
+<<<<<<< HEAD
 ```markdown
 # MiyuLauncher — Roadmap
 
 Este documento contiene la hoja de ruta general de MiyuLauncher.
 
 Los números de versión son orientativos y podrán cambiar durante el desarrollo.
+=======
+# MiyuLauncher — Roadmap
+
+Este documento contiene la hoja de ruta general de MiyuLauncher. Los números de versión son orientativos y podrán cambiar durante el desarrollo.
+>>>>>>> c75cd589522cd6c9353ac9d40d24a21c764c782f
 
 ---
 
@@ -13,11 +19,20 @@ Los números de versión son orientativos y podrán cambiar durante el desarroll
 - [x] Instalar Python
 - [x] Instalar Git
 - [x] Instalar PySide6
+<<<<<<< HEAD
 - [x] Crear estructura
 - [x] Crear primera ventana
 - [ ] Crear documentación
 - [ ] Crear primer commit
 - [ ] Crear repositorio GitHub
+=======
+- [x] Crear estructura inicial
+- [x] Crear primera ventana
+- [x] Crear documentación base
+- [x] Crear primer commit
+- [x] Crear repositorio GitHub
+- [x] Conectar el repositorio para trabajar sobre el proyecto real
+>>>>>>> c75cd589522cd6c9353ac9d40d24a21c764c782f
 
 ---
 
@@ -33,7 +48,11 @@ Los números de versión son orientativos y podrán cambiar durante el desarroll
 - Construir primer comando de lanzamiento
 - Lanzar Minecraft desde MiyuLauncher
 
+<<<<<<< HEAD
 Hito: Minecraft puede iniciarse desde MiyuLauncher.
+=======
+**Hito:** Minecraft puede iniciarse desde MiyuLauncher.
+>>>>>>> c75cd589522cd6c9353ac9d40d24a21c764c782f
 
 ---
 
@@ -47,7 +66,11 @@ Hito: Minecraft puede iniciarse desde MiyuLauncher.
 - Crear instancia independiente
 - Reparar archivos faltantes
 
+<<<<<<< HEAD
 Hito: MiyuLauncher puede instalar Minecraft sin depender del launcher oficial.
+=======
+**Hito:** MiyuLauncher puede instalar Minecraft sin depender del launcher oficial.
+>>>>>>> c75cd589522cd6c9353ac9d40d24a21c764c782f
 
 ---
 
@@ -57,9 +80,15 @@ Hito: MiyuLauncher puede instalar Minecraft sin depender del launcher oficial.
 - Descargar Java Runtime
 - Administrar runtimes
 - Permitir Java personalizado
+<<<<<<< HEAD
 - Seleccionar automáticamente runtime apropiado
 
 Hito: el usuario no necesita instalar Java manualmente.
+=======
+- Seleccionar automáticamente el runtime apropiado
+
+**Hito:** el usuario no necesita instalar Java manualmente.
+>>>>>>> c75cd589522cd6c9353ac9d40d24a21c764c782f
 
 ---
 
@@ -74,7 +103,11 @@ Hito: el usuario no necesita instalar Java manualmente.
 - Selector de cuentas
 - Avatar del jugador
 
+<<<<<<< HEAD
 Hito: Minecraft puede ejecutarse autenticado.
+=======
+**Hito:** Minecraft puede ejecutarse autenticado.
+>>>>>>> c75cd589522cd6c9353ac9d40d24a21c764c782f
 
 ---
 
@@ -115,9 +148,13 @@ Distinguir archivos administrados y preferencias personales.
 
 ## FASE 8 — Remote Manifest
 
+<<<<<<< HEAD
 Definir protocolo de distribución.
 
 El manifest contendrá:
+=======
+Definir protocolo de distribución con:
+>>>>>>> c75cd589522cd6c9353ac9d40d24a21c764c782f
 
 - versión del pack
 - Minecraft
@@ -129,6 +166,7 @@ El manifest contendrá:
 - hashes
 - obligatoriedad
 
+<<<<<<< HEAD
 Implementar:
 
 - comparación local/remota
@@ -136,6 +174,9 @@ Implementar:
 - velocidad
 - descargas
 - verificación
+=======
+Implementar comparación local/remota, progreso, velocidad, descargas y verificación.
+>>>>>>> c75cd589522cd6c9353ac9d40d24a21c764c782f
 
 ---
 
@@ -152,6 +193,7 @@ Implementar:
 ## FASE 10 — UI definitiva
 
 - Diseño visual
+<<<<<<< HEAD
 - navegación
 - pantalla principal
 - login
@@ -160,12 +202,23 @@ Implementar:
 - errores
 - animaciones
 - identidad visual
+=======
+- Navegación
+- Pantalla principal
+- Login
+- Ajustes
+- Progreso
+- Errores
+- Animaciones
+- Identidad visual
+>>>>>>> c75cd589522cd6c9353ac9d40d24a21c764c782f
 
 ---
 
 ## FASE 11 — Noticias y eventos
 
 - API de noticias
+<<<<<<< HEAD
 - eventos
 - banners
 - changelogs
@@ -174,6 +227,16 @@ Implementar:
 ---
 
 ## FASE 12 — Integración servidor
+=======
+- Eventos
+- Banners
+- Changelogs
+- Avisos importantes
+
+---
+
+## FASE 12 — Integración con el servidor
+>>>>>>> c75cd589522cd6c9353ac9d40d24a21c764c782f
 
 Mostrar:
 
@@ -189,20 +252,35 @@ Mostrar:
 
 - RAM
 - Java
+<<<<<<< HEAD
 - directorios
 - preferencias
 - mods opcionales
 - configuraciones avanzadas
+=======
+- Directorios
+- Preferencias
+- Mods opcionales
+- Configuraciones avanzadas
+>>>>>>> c75cd589522cd6c9353ac9d40d24a21c764c782f
 
 ---
 
 ## FASE 14 — Logs y diagnóstico
 
+<<<<<<< HEAD
 - launcher.log
 - captura de errores
 - diagnóstico
 - exportación de información
 - logs de Minecraft
+=======
+- `launcher.log`
+- Captura de errores
+- Diagnóstico
+- Exportación de información
+- Logs de Minecraft
+>>>>>>> c75cd589522cd6c9353ac9d40d24a21c764c782f
 
 ---
 
@@ -248,6 +326,7 @@ Contemplar:
 
 ## FASE 18 — Backend
 
+<<<<<<< HEAD
 Endpoints previstos conceptualmente:
 
 - launcher/version
@@ -263,6 +342,17 @@ Almacenamiento para:
 - assets
 - actualizaciones
 - banners
+=======
+Endpoints conceptuales:
+
+- `launcher/version`
+- `manifest`
+- `news`
+- `events`
+- `server`
+
+Almacenamiento para mods, configs, assets, actualizaciones y banners.
+>>>>>>> c75cd589522cd6c9353ac9d40d24a21c764c782f
 
 ---
 
@@ -283,9 +373,13 @@ Herramientas para:
 
 Convertir MiyuLauncher en aplicación distribuible.
 
+<<<<<<< HEAD
 Objetivo:
 
 `MiyuLauncher.exe`
+=======
+Objetivo: `MiyuLauncher.exe`
+>>>>>>> c75cd589522cd6c9353ac9d40d24a21c764c782f
 
 El usuario no necesitará Python.
 
@@ -293,11 +387,15 @@ El usuario no necesitará Python.
 
 ## FASE 21 — Instalador
 
+<<<<<<< HEAD
 Crear:
 
 `MiyuLauncher-Setup.exe`
 
 Funciones:
+=======
+Crear `MiyuLauncher-Setup.exe` con:
+>>>>>>> c75cd589522cd6c9353ac9d40d24a21c764c782f
 
 - instalación
 - accesos directos
@@ -325,20 +423,28 @@ Probar:
 
 ## FASE 23 — Release Candidate
 
+<<<<<<< HEAD
 Congelar nuevas características.
 
 Trabajar exclusivamente en:
+=======
+Congelar nuevas características y trabajar exclusivamente en:
+>>>>>>> c75cd589522cd6c9353ac9d40d24a21c764c782f
 
 - bugs
 - estabilidad
 - seguridad
 - UX
 
+<<<<<<< HEAD
 Versiones:
 
 - 1.0.0-rc1
 - 1.0.0-rc2
 - etc.
+=======
+Versiones previstas: `1.0.0-rc1`, `1.0.0-rc2`, etc.
+>>>>>>> c75cd589522cd6c9353ac9d40d24a21c764c782f
 
 ---
 
@@ -346,9 +452,15 @@ Versiones:
 
 Objetivo final:
 
+<<<<<<< HEAD
 Instalar
 → iniciar sesión
 → sincronizar
 → JUGAR.
 
 Las actualizaciones posteriores deberán ser automáticas.
+=======
+**Instalar → iniciar sesión → sincronizar → JUGAR.**
+
+Las actualizaciones posteriores deberán ser automáticas.
+>>>>>>> c75cd589522cd6c9353ac9d40d24a21c764c782f

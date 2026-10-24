@@ -1,11 +1,8 @@
 # MiyuLauncher
 
-MiyuLauncher es un launcher personalizado de Minecraft Java Edition desarrollado
-principalmente para un servidor privado entre amigos.
+MiyuLauncher es un launcher personalizado de Minecraft Java Edition desarrollado principalmente para un servidor privado entre amigos.
 
-El objetivo es proporcionar una experiencia sencilla para los jugadores,
-automatizando la preparación y mantenimiento de la instalación necesaria para
-entrar al servidor.
+El objetivo es proporcionar una experiencia sencilla para los jugadores, automatizando la preparación y mantenimiento de la instalación necesaria para entrar al servidor.
 
 ## Objetivos principales
 
@@ -40,9 +37,7 @@ La intención es que el usuario final tenga que hacer lo mínimo posible:
 
 MiyuLauncher se encuentra actualmente en desarrollo inicial.
 
-Versión actual:
-
-`0.1.0-dev`
+Versión actual: `0.1.0-dev`
 
 ## Plataformas
 
