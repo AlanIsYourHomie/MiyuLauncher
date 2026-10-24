@@ -1,90 +1,354 @@
+```markdown
+# MiyuLauncher — Roadmap
+
+Este documento contiene la hoja de ruta general de MiyuLauncher.
+
+Los números de versión son orientativos y podrán cambiar durante el desarrollo.
 
 ---
 
-## 2. `PROJECT_STATE.md`
+## FASE 0 — Preparación
 
-Este será **importantísimo**.
+- [x] Elegir tecnologías
+- [x] Instalar Python
+- [x] Instalar Git
+- [x] Instalar PySide6
+- [x] Crear estructura
+- [x] Crear primera ventana
+- [ ] Crear documentación
+- [ ] Crear primer commit
+- [ ] Crear repositorio GitHub
 
-```markdown
-# MiyuLauncher — Project State
+---
 
-Última actualización: 2026-10-23
+## FASE 1 — Core mínimo
 
-## Versión actual
+- Detectar sistema operativo
+- Detectar arquitectura
+- Detectar memoria disponible
+- Administrar rutas
+- Detectar Java
+- Detectar instalaciones de Minecraft
+- Leer versiones instaladas
+- Construir primer comando de lanzamiento
+- Lanzar Minecraft desde MiyuLauncher
 
-0.1.0-dev
+Hito: Minecraft puede iniciarse desde MiyuLauncher.
 
-## Fase actual
+---
 
-FASE 0 — Preparación del proyecto
+## FASE 2 — Minecraft Manager
 
-## Estado general
+- Consultar versiones disponibles
+- Descargar Minecraft
+- Descargar libraries
+- Descargar assets
+- Verificar hashes
+- Crear instancia independiente
+- Reparar archivos faltantes
 
-🟡 En desarrollo
+Hito: MiyuLauncher puede instalar Minecraft sin depender del launcher oficial.
 
-## Entorno actual
+---
 
-Sistema principal de desarrollo:
+## FASE 3 — Java Manager
 
-- Windows
-- Python 3.14.6
-- PySide6 6.12.0
-- Git 2.54.0.windows.1
+- Detectar versión requerida
+- Descargar Java Runtime
+- Administrar runtimes
+- Permitir Java personalizado
+- Seleccionar automáticamente runtime apropiado
 
-No se utiliza entorno virtual de Python por decisión del desarrollador.
+Hito: el usuario no necesita instalar Java manualmente.
 
-Las dependencias se registrarán en `requirements.txt`.
+---
 
-## Completado
+## FASE 4 — Autenticación
 
-- [x] Nombre del proyecto definido: MiyuLauncher
-- [x] Python instalado
-- [x] Git instalado y configurado
-- [x] PySide6 instalado
-- [x] PySide6 probado correctamente
-- [x] Repositorio Git local inicializado
-- [x] Estructura inicial de carpetas creada
-- [x] Primer prototipo gráfico ejecutado correctamente
-- [x] QApplication funcionando
-- [x] QMainWindow funcionando
+- Microsoft OAuth
+- Autenticación Minecraft
+- Perfil Minecraft
+- Sesiones
+- Renovación de tokens
+- Cerrar sesión
+- Selector de cuentas
+- Avatar del jugador
 
-## En progreso
+Hito: Minecraft puede ejecutarse autenticado.
 
-- [ ] Documentación inicial
-- [ ] Primer commit
-- [ ] Crear repositorio remoto en GitHub
-- [ ] Conectar repositorio local con GitHub
+---
 
-## Próximo objetivo
+## FASE 5 — Fabric
 
-Finalizar FASE 0.
+- Consultar versiones
+- Instalar Fabric Loader
+- Gestionar Fabric
+- Lanzar Minecraft con Fabric
 
-Después comenzar:
+---
 
-FASE 1 — Núcleo mínimo del launcher.
+## FASE 6 — Mod Manager
 
-El primer objetivo técnico será detectar el entorno del sistema y comenzar
-el desarrollo del administrador de Java/Minecraft.
+- Manifest de mods
+- Mods obligatorios
+- Mods opcionales
+- Descarga automática
+- Actualización
+- Eliminación de archivos obsoletos
+- SHA-256
+- Descargas diferenciales
 
-## Arquitectura prevista
+---
 
-```text
-src/miyu_launcher/
+## FASE 7 — Content Manager
 
-auth/
-    Autenticación y cuentas.
+Administrar:
 
-config/
-    Configuración del launcher.
+- configs
+- resource packs
+- shader packs
+- archivos adicionales
 
-core/
-    Minecraft, Java, Fabric, rutas y lógica principal.
+Distinguir archivos administrados y preferencias personales.
 
-network/
-    Comunicación con servicios remotos y servidor.
+---
 
-ui/
-    Interfaz gráfica Qt.
+## FASE 8 — Remote Manifest
 
-updater/
-    Manifest, verificación, descargas y actualizaciones.
+Definir protocolo de distribución.
+
+El manifest contendrá:
+
+- versión del pack
+- Minecraft
+- Fabric
+- Java
+- archivos
+- URLs
+- tamaños
+- hashes
+- obligatoriedad
+
+Implementar:
+
+- comparación local/remota
+- progreso
+- velocidad
+- descargas
+- verificación
+
+---
+
+## FASE 9 — Reparación
+
+- Verificación rápida
+- Verificación completa
+- Detectar archivos corruptos
+- Reparar archivos
+- Restaurar instalación
+
+---
+
+## FASE 10 — UI definitiva
+
+- Diseño visual
+- navegación
+- pantalla principal
+- login
+- ajustes
+- progreso
+- errores
+- animaciones
+- identidad visual
+
+---
+
+## FASE 11 — Noticias y eventos
+
+- API de noticias
+- eventos
+- banners
+- changelogs
+- avisos importantes
+
+---
+
+## FASE 12 — Integración servidor
+
+Mostrar:
+
+- online/offline
+- jugadores
+- máximo
+- ping
+- información relevante
+
+---
+
+## FASE 13 — Ajustes
+
+- RAM
+- Java
+- directorios
+- preferencias
+- mods opcionales
+- configuraciones avanzadas
+
+---
+
+## FASE 14 — Logs y diagnóstico
+
+- launcher.log
+- captura de errores
+- diagnóstico
+- exportación de información
+- logs de Minecraft
+
+---
+
+## FASE 15 — Manejo de errores
+
+Contemplar:
+
+- sin Internet
+- servidor caído
+- API caída
+- descarga interrumpida
+- disco lleno
+- Java incorrecto
+- archivos corruptos
+- login expirado
+- Fabric incompatible
+- crash de Minecraft
+
+---
+
+## FASE 16 — Seguridad
+
+- HTTPS
+- hashes
+- almacenamiento seguro de tokens
+- validación de URLs
+- validación de manifest
+- seguridad de actualizaciones
+- posible firma de manifests/releases
+
+---
+
+## FASE 17 — Self Updater
+
+- comprobar versión de MiyuLauncher
+- descargar actualización
+- updater independiente
+- reemplazar aplicación
+- reiniciar launcher
+- rollback ante fallos
+
+---
+
+## FASE 18 — Backend
+
+Endpoints previstos conceptualmente:
+
+- launcher/version
+- manifest
+- news
+- events
+- server
+
+Almacenamiento para:
+
+- mods
+- configs
+- assets
+- actualizaciones
+- banners
+
+---
+
+## FASE 19 — Panel administrativo
+
+Herramientas para:
+
+- administrar mods
+- publicar versiones
+- publicar noticias
+- crear eventos
+- subir banners
+- generar manifests
+
+---
+
+## FASE 20 — Empaquetado
+
+Convertir MiyuLauncher en aplicación distribuible.
+
+Objetivo:
+
+`MiyuLauncher.exe`
+
+El usuario no necesitará Python.
+
+---
+
+## FASE 21 — Instalador
+
+Crear:
+
+`MiyuLauncher-Setup.exe`
+
+Funciones:
+
+- instalación
+- accesos directos
+- menú Inicio
+- desinstalación
+- directorios de aplicación
+
+---
+
+## FASE 22 — Testing
+
+Probar:
+
+- PC limpia
+- sin Java
+- sin Minecraft
+- Internet lento
+- pérdida de conexión
+- archivos corruptos
+- actualizaciones entre versiones
+- hardware diferente
+- PCs de usuarios reales
+
+---
+
+## FASE 23 — Release Candidate
+
+Congelar nuevas características.
+
+Trabajar exclusivamente en:
+
+- bugs
+- estabilidad
+- seguridad
+- UX
+
+Versiones:
+
+- 1.0.0-rc1
+- 1.0.0-rc2
+- etc.
+
+---
+
+## FASE 24 — MiyuLauncher 1.0
+
+Objetivo final:
+
+Instalar
+→ iniciar sesión
+→ sincronizar
+→ JUGAR.
+
+Las actualizaciones posteriores deberán ser automáticas.
