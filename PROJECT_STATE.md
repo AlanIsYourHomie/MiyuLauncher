@@ -8,7 +8,7 @@
 
 ## Fase actual
 
-FASE 0 — Preparación del proyecto
+FASE 1 — Core mínimo
 
 ## Estado general
 
@@ -24,7 +24,7 @@ FASE 0 — Preparación del proyecto
 
 Las dependencias se registran en `requirements.txt`.
 
-## Completado
+## FASE 0 — Completada
 
 - [x] Nombre del proyecto definido: MiyuLauncher
 - [x] Python instalado
@@ -32,39 +32,66 @@ Las dependencias se registran en `requirements.txt`.
 - [x] PySide6 instalado y probado
 - [x] Repositorio Git local inicializado
 - [x] Primer prototipo gráfico ejecutado correctamente
-- [x] QApplication y QMainWindow funcionando
 - [x] Repositorio remoto creado en GitHub
 - [x] Primer push realizado
-- [x] GitHub conectado a ChatGPT para continuar el desarrollo sobre el repositorio real
+- [x] GitHub conectado a ChatGPT
+- [x] README, ROADMAP y PROJECT_STATE organizados
+- [x] Estructura modular inicial creada
 
-## En progreso
+## FASE 1 — En progreso
 
-- [ ] Terminar la estructura versionada del proyecto
-- [ ] Cerrar FASE 0
+### Implementado
+
+- [x] `core/system.py`
+  - sistema operativo
+  - versión de Windows
+  - arquitectura
+  - máquina/procesador
+  - RAM física total en Windows
+- [x] `core/paths.py`
+  - raíz administrada en `%LOCALAPPDATA%/MiyuLauncher`
+  - instancia
+  - runtime
+  - cache
+  - downloads
+  - logs
+- [x] `ui/main_window.py`
+  - ventana separada del punto de entrada
+  - muestra información básica detectada
+  - botón JUGAR deshabilitado temporalmente
+- [x] `main.py` reducido a punto de entrada de la aplicación
+
+### Pendiente de validación local
+
+- [ ] Ejecutar `python main.py` después del último `git pull`
+- [ ] Confirmar que se detectan correctamente Windows, arquitectura y RAM
+- [ ] Confirmar creación de `%LOCALAPPDATA%/MiyuLauncher`
 
 ## Próximo objetivo
 
-Comenzar FASE 1 — Core mínimo.
+Una vez validado el bloque actual:
 
-Primeros módulos previstos:
+1. Crear `core/java.py`.
+2. Buscar instalaciones de Java disponibles.
+3. Ejecutar `java -version` de forma segura para determinar versiones reales.
+4. Mostrar el Java detectado en la interfaz.
+5. Después comenzar la detección de Minecraft.
 
-1. `core/system.py` — información del sistema, arquitectura y memoria.
-2. `core/paths.py` — rutas administradas por MiyuLauncher.
-3. `core/java.py` — detección y administración inicial de Java.
-4. Detección de instalaciones/versiones de Minecraft.
-5. Primer lanzamiento de Minecraft desde MiyuLauncher.
-
-## Arquitectura prevista
+## Arquitectura actual
 
 ```text
 src/miyu_launcher/
-├── auth/       # autenticación y cuentas
-├── config/     # configuración del launcher
-├── core/       # Minecraft, Java, Fabric, rutas y lógica principal
-├── network/    # servicios remotos y estado del servidor
-├── ui/         # interfaz PySide6/Qt
-└── updater/    # manifests, verificación, descargas y actualizaciones
+├── __init__.py
+├── core/
+│   ├── __init__.py
+│   ├── paths.py
+│   └── system.py
+└── ui/
+    ├── __init__.py
+    └── main_window.py
 ```
+
+Las carpetas `auth`, `config`, `network` y `updater` se incorporarán a Git cuando contengan sus primeros módulos reales.
 
 ## Principios del proyecto
 
@@ -86,19 +113,20 @@ src/miyu_launcher/
 - Mod loader: Fabric.
 - Plataforma inicial: Windows 10/11.
 - Java: a largo plazo, runtime administrado por MiyuLauncher.
+- Datos administrados: `%LOCALAPPDATA%/MiyuLauncher` en Windows.
 - Actualizaciones: manifest remoto + hashes SHA-256.
 - Mods: sincronización automática; algunos podrán ser opcionales.
 - Autenticación oficial: Microsoft/Minecraft; no se almacenarán contraseñas.
 
 ## Problemas conocidos
 
-Ninguno actualmente.
+Ninguno confirmado actualmente.
 
-## Última prueba realizada
+## Última prueba confirmada
 
-`python main.py`
+Antes de iniciar FASE 1, `python main.py` abrió correctamente el prototipo inicial.
 
-Resultado: la ventana principal abrió correctamente mostrando `Miyu Launcher`.
+La versión modular actual todavía debe validarse en el PC de desarrollo.
 
 ## Cómo continuar en otra conversación
 
