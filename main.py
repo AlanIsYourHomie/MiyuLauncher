@@ -1,25 +1,24 @@
+from __future__ import annotations
+
 import sys
+from pathlib import Path
 
-from PySide6.QtWidgets import QApplication, QLabel, QMainWindow
-
-
-class MiyuLauncher(QMainWindow):
-    def __init__(self):
-        super().__init__()
-
-        self.setWindowTitle("Miyu Launcher")
-        self.resize(1000, 600)
-
-        label = QLabel("Miyu Launcher", self)
-        label.setStyleSheet("font-size: 32px;")
-        label.adjustSize()
-        label.move(40, 40)
+from PySide6.QtWidgets import QApplication
 
 
-def main():
+PROJECT_ROOT = Path(__file__).resolve().parent
+SRC_DIR = PROJECT_ROOT / "src"
+
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
+
+from miyu_launcher.ui.main_window import MainWindow
+
+
+def main() -> None:
     app = QApplication(sys.argv)
 
-    window = MiyuLauncher()
+    window = MainWindow()
     window.show()
 
     sys.exit(app.exec())
