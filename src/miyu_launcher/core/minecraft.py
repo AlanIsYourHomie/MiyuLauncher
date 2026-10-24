@@ -15,6 +15,13 @@ class MinecraftVersion:
     version_type: str | None
     main_class: str | None
     inherits_from: str | None
+    client_download_url: str | None
+    client_download_sha1: str | None
+    asset_index_id: str | None
+    java_major_version: int | None
+    libraries_count: int
+    has_modern_arguments: bool
+    has_legacy_arguments: bool
 
 
 @dataclass(frozen=True)
@@ -59,6 +66,18 @@ def _read_version(version_dir: Path) -> MinecraftVersion | None:
 
     jar_file = version_dir / f"{version_id}.jar"
 
+    downloads = data.get("downloads") if isinstance(data.get("downloads"), dict) else {}
+    client_download = downloads.get("client") if isinstance(downloads.get("client"), dict) else {}
+
+    asset_index = data.get("assetIndex") if isinstance(data.get("assetIndex"), dict) else {}
+    java_version = data.get("javaVersion") if isinstance(data.get("javaVersion"), dict) else {}
+    libraries = data.get("libraries") if isinstance(data.get("libraries"), list) else []
+    arguments = data.get("arguments") if isinstance(data.get("arguments"), dict) else None
+
+    java_major = java_version.get("majorVersion")
+    if not isinstance(java_major, int):
+        java_major = None
+
     return MinecraftVersion(
         version_id=str(data.get("id") or version_id),
         directory=version_dir,
@@ -67,6 +86,13 @@ def _read_version(version_dir: Path) -> MinecraftVersion | None:
         version_type=data.get("type"),
         main_class=data.get("mainClass"),
         inherits_from=data.get("inheritsFrom"),
+        client_download_url=client_download.get("url") if isinstance(client_download.get("url"), str) else None,
+        client_download_sha1=client_download.get("sha1") if isinstance(client_download.get("sha1"), str) else None,
+        asset_index_id=asset_index.get("id") if isinstance(asset_index.get("id"), str) else None,
+        java_major_version=java_major,
+        libraries_count=len(libraries),
+        has_modern_arguments=arguments is not None,
+        has_legacy_arguments=isinstance(data.get("minecraftArguments"), str),
     )
 
 
