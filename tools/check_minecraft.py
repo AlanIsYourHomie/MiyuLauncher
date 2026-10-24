@@ -29,10 +29,26 @@ def main() -> None:
 
         for version in installation.versions:
             jar_status = "sí" if version.jar_file is not None else "no"
-            print(
-                f"      - {version.version_id} | tipo={version.version_type or 'desconocido'} | "
-                f"jar={jar_status} | inherits={version.inherits_from or '-'}"
+            downloadable_client = "sí" if version.client_download_url else "no"
+            java_required = str(version.java_major_version) if version.java_major_version else "-"
+            args_mode = (
+                "modernos"
+                if version.has_modern_arguments
+                else "legacy"
+                if version.has_legacy_arguments
+                else "-"
             )
+
+            print(f"      - {version.version_id}")
+            print(f"          tipo: {version.version_type or 'desconocido'}")
+            print(f"          jar local: {jar_status}")
+            print(f"          cliente descargable: {downloadable_client}")
+            print(f"          Java requerido: {java_required}")
+            print(f"          asset index: {version.asset_index_id or '-'}")
+            print(f"          librerías declaradas: {version.libraries_count}")
+            print(f"          argumentos: {args_mode}")
+            print(f"          main class: {version.main_class or '-'}")
+            print(f"          inherits: {version.inherits_from or '-'}")
 
         print()
 
