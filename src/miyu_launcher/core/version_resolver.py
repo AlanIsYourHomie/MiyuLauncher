@@ -6,6 +6,7 @@ from pathlib import Path
 
 from miyu_launcher.core.java import JavaInstallation, select_java
 from miyu_launcher.core.minecraft import MinecraftInstallation, MinecraftVersion
+from miyu_launcher.core.runtime import find_managed_runtime
 
 
 @dataclass(frozen=True)
@@ -13,6 +14,7 @@ class ResolvedMinecraftVersion:
     version: MinecraftVersion
     installation_root: Path
     java: JavaInstallation | None
+    java_source: str | None
     required_java_major: int | None
     java_compatible: bool
     client_jar: Path
@@ -47,21 +49,41 @@ def _load_version_json(version: MinecraftVersion) -> dict:
     return data
 
 
+def _select_java_for_version(required_java: int | None) -> tuple[JavaInstallation | None, str | None]:
+    """Prefer MiyuLauncher's managed runtime, then fall back to system Java."""
+
+    if required_java is not None:
+        managed = find_managed_runtime(required_java)
+        if managed is not None:
+            return managed.installation, "MiyuLauncher managed runtime"
+
+        system_java = select_java(required_java)
+        if system_java is not None:
+            return system_java, "System Java"
+
+        return None, None
+
+    system_java = select_java()
+    if system_java is not None:
+        return system_java, "System Java"
+
+    return None, None
+
+
 def resolve_version(
     installation: MinecraftInstallation,
     version: MinecraftVersion,
 ) -> ResolvedMinecraftVersion:
-    """Resolve the local resources and Java runtime required by a Minecraft version.
+    """Resolve local resources and the Java runtime required by a Minecraft version.
 
-    This stage is intentionally read-only. It does not download, extract or modify
-    any Minecraft files. Missing resources are reported so the future installer can
-    prepare them before launch.
+    This stage is read-only. Managed runtimes are preferred when already installed,
+    but this function never downloads or modifies anything.
     """
 
     _load_version_json(version)
 
     required_java = version.java_major_version
-    java = select_java(required_java) if required_java is not None else select_java()
+    java, java_source = _select_java_for_version(required_java)
     java_compatible = java is not None and (
         required_java is None or java.major == required_java
     )
@@ -72,6 +94,7 @@ def resolve_version(
         version=version,
         installation_root=installation.root,
         java=java,
+        java_source=java_source,
         required_java_major=required_java,
         java_compatible=java_compatible,
         client_jar=client_jar,
