@@ -40,7 +40,7 @@ Las dependencias se registran en `requirements.txt`.
 
 ## FASE 1 — En progreso
 
-### Implementado
+### Implementado y validado localmente
 
 - [x] `core/system.py`
   - sistema operativo
@@ -60,22 +60,30 @@ Las dependencias se registran en `requirements.txt`.
   - muestra información básica detectada
   - botón JUGAR deshabilitado temporalmente
 - [x] `main.py` reducido a punto de entrada de la aplicación
+- [x] La versión modular abre correctamente en el PC de desarrollo
+- [x] Detección de Windows, arquitectura y RAM confirmada
+- [x] Creación de `%LOCALAPPDATA%/MiyuLauncher` confirmada
 
-### Pendiente de validación local
+### Implementado, pendiente de validación local
 
-- [ ] Ejecutar `python main.py` después del último `git pull`
-- [ ] Confirmar que se detectan correctamente Windows, arquitectura y RAM
-- [ ] Confirmar creación de `%LOCALAPPDATA%/MiyuLauncher`
+- [x] `core/java.py`
+  - búsqueda mediante `PATH`
+  - búsqueda mediante `JAVA_HOME`
+  - búsqueda en directorios comunes de Java para Windows
+  - ejecución segura de `java -version`
+  - lectura de versión y versión mayor
+  - eliminación de rutas duplicadas
+  - selección de una instalación Java preferida
+- [x] `tools/check_java.py`
+  - utilidad temporal para comprobar detección de Java desde consola
 
 ## Próximo objetivo
 
-Una vez validado el bloque actual:
-
-1. Crear `core/java.py`.
-2. Buscar instalaciones de Java disponibles.
-3. Ejecutar `java -version` de forma segura para determinar versiones reales.
-4. Mostrar el Java detectado en la interfaz.
-5. Después comenzar la detección de Minecraft.
+1. Ejecutar `python tools/check_java.py` en el PC de desarrollo.
+2. Confirmar qué instalaciones y versiones de Java detecta.
+3. Corregir casos de detección si fuera necesario.
+4. Mostrar el Java seleccionado en la interfaz.
+5. Después comenzar la detección de instalaciones/versiones de Minecraft.
 
 ## Arquitectura actual
 
@@ -84,11 +92,15 @@ src/miyu_launcher/
 ├── __init__.py
 ├── core/
 │   ├── __init__.py
+│   ├── java.py
 │   ├── paths.py
 │   └── system.py
 └── ui/
     ├── __init__.py
     └── main_window.py
+
+tools/
+└── check_java.py
 ```
 
 Las carpetas `auth`, `config`, `network` y `updater` se incorporarán a Git cuando contengan sus primeros módulos reales.
@@ -124,9 +136,7 @@ Ninguno confirmado actualmente.
 
 ## Última prueba confirmada
 
-Antes de iniciar FASE 1, `python main.py` abrió correctamente el prototipo inicial.
-
-La versión modular actual todavía debe validarse en el PC de desarrollo.
+`python main.py` abre correctamente la versión modular y muestra la información del sistema esperada.
 
 ## Cómo continuar en otra conversación
 
