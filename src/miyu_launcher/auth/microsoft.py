@@ -21,7 +21,9 @@ USER_AGENT = "MiyuLauncher/0.1.0-dev"
 
 
 class MicrosoftAuthError(RuntimeError):
-    pass
+    def __init__(self, message: str, *, error_code: str | None = None) -> None:
+        super().__init__(message)
+        self.error_code = error_code
 
 
 @dataclass(frozen=True)
@@ -86,8 +88,19 @@ def _request_json(
             details = json.loads(exc.read().decode("utf-8", errors="replace"))
         except Exception:
             details = {"message": str(exc)}
-        message = details.get("error_description") or details.get("Message") or details.get("message") or str(exc)
-        raise MicrosoftAuthError(f"HTTP {exc.code}: {message}") from exc
+
+        error_code = details.get("error") if isinstance(details.get("error"), str) else None
+        description = (
+            details.get("error_description")
+            or details.get("Message")
+            or details.get("message")
+            or str(exc)
+        )
+        if error_code:
+            message = f"HTTP {exc.code}: {error_code}: {description}"
+        else:
+            message = f"HTTP {exc.code}: {description}"
+        raise MicrosoftAuthError(message, error_code=error_code) from exc
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
         raise MicrosoftAuthError(f"Error de red/autenticación: {exc}") from exc
 
@@ -137,19 +150,18 @@ def poll_device_code(
                 },
             )
         except MicrosoftAuthError as exc:
-            text = str(exc)
-            if "authorization_pending" in text:
+            if exc.error_code == "authorization_pending":
                 if progress:
                     progress("Esperando que completes el inicio de sesión en Microsoft...")
                 time.sleep(interval)
                 continue
-            if "slow_down" in text:
+            if exc.error_code == "slow_down":
                 interval += 5
                 time.sleep(interval)
                 continue
-            if "authorization_declined" in text:
+            if exc.error_code == "authorization_declined":
                 raise MicrosoftAuthError("El inicio de sesión fue cancelado por el usuario.") from exc
-            if "expired_token" in text:
+            if exc.error_code == "expired_token":
                 raise MicrosoftAuthError("El código de inicio de sesión expiró.") from exc
             raise
 
