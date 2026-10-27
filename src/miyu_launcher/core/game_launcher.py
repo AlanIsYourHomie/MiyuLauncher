@@ -3,18 +3,23 @@ from __future__ import annotations
 import os
 import subprocess
 import uuid
-from pathlib import Path
 from threading import Event
 from typing import Callable
 
 from miyu_launcher.auth import microsoft
+from miyu_launcher.auth.session_store import (
+    SessionStoreError,
+    clear_saved_session,
+    load_session,
+    save_session,
+)
+from miyu_launcher.auth.token_refresh import refresh_microsoft_token
 from miyu_launcher.core.assets import install_missing_assets
 from miyu_launcher.core.launch_command import LaunchProfile, build_launch_command
 from miyu_launcher.core.libraries import resolve_libraries
 from miyu_launcher.core.minecraft import MinecraftInstallation, MinecraftVersion, find_default_minecraft_installation
 from miyu_launcher.core.minecraft_installer import install_version_dependencies
 from miyu_launcher.core.natives import extract_natives
-from miyu_launcher.core.paths import get_launcher_paths
 from miyu_launcher.core.runtime import install_managed_runtime
 from miyu_launcher.core.version_resolver import resolve_version
 
@@ -38,6 +43,86 @@ def _check_cancelled(cancel_event: Event | None) -> None:
 def _report(progress: ProgressCallback | None, message: str) -> None:
     if progress is not None:
         progress(message)
+
+
+_AUTH_ERRORS_REQUIRING_INTERACTIVE_LOGIN = {
+    "invalid_grant",
+    "interaction_required",
+    "login_required",
+    "consent_required",
+    "invalid_token",
+    "expired_token",
+}
+
+
+def _start_interactive_login(
+    client_id: str,
+    *,
+    progress: ProgressCallback | None,
+    authentication_code: AuthenticationCodeCallback | None,
+    cancel_event: Event | None,
+) -> microsoft.MicrosoftToken:
+    """Run device-code login when no usable saved session is available."""
+    _check_cancelled(cancel_event)
+    _report(progress, "Solicitando inicio de sesión de Microsoft...")
+    device_session = microsoft.begin_device_code(client_id)
+    _check_cancelled(cancel_event)
+    if authentication_code is not None:
+        authentication_code(
+            device_session.verification_uri,
+            device_session.user_code,
+            device_session.message,
+        )
+    else:
+        _report(
+            progress,
+            device_session.message
+            or f"Abre {device_session.verification_uri} e introduce el código {device_session.user_code}.",
+        )
+
+    def authentication_progress(message: str) -> None:
+        _check_cancelled(cancel_event)
+        _report(progress, message)
+
+    token = microsoft.poll_device_code(
+        client_id,
+        device_session,
+        progress=authentication_progress,
+    )
+    _check_cancelled(cancel_event)
+    _report(progress, "Microsoft: cuenta verificada.")
+    return token
+
+
+def _discard_saved_session(progress: ProgressCallback | None) -> None:
+    try:
+        clear_saved_session()
+    except SessionStoreError:
+        # Interactive login can proceed; the old file remains encrypted.
+        _report(progress, "Aviso: no se pudo eliminar el archivo de sesión anterior.")
+
+
+def _save_verified_session(
+    token: microsoft.MicrosoftToken,
+    account: microsoft.MinecraftAccount,
+    progress: ProgressCallback | None,
+) -> None:
+    if not token.refresh_token:
+        _report(
+            progress,
+            "Microsoft no entregó un token de renovación; la próxima vez podría pedirte iniciar sesión.",
+        )
+        return
+    try:
+        save_session(token.refresh_token, account.username, account.uuid)
+    except SessionStoreError:
+        _report(
+            progress,
+            "Aviso: no se pudo guardar la sesión de forma segura. Minecraft puede abrirse, "
+            "pero quizá debas iniciar sesión la próxima vez.",
+        )
+    else:
+        _report(progress, f"Sesión segura guardada para {account.username}.")
 
 
 def _get_xuid(ms_access_token: str) -> str:
@@ -186,36 +271,67 @@ def launch_minecraft(
     if not natives.extracted_files:
         _report(progress, "Aviso: Minecraft no reportó bibliotecas nativas extraídas; se intentará iniciar igualmente.")
 
-    _report(progress, "Solicitando inicio de sesión de Microsoft...")
-    device_session = microsoft.begin_device_code(client_id)
-    _check_cancelled(cancel_event)
-    if authentication_code is not None:
-        authentication_code(
-            device_session.verification_uri,
-            device_session.user_code,
-            device_session.message,
-        )
-    else:
+    # Prefer a saved refresh token. Only invalid/revoked-token responses trigger
+    # an interactive sign-in; network/service failures are surfaced instead of
+    # unexpectedly opening the browser.
+    _report(progress, "Comprobando si existe una sesión Microsoft guardada...")
+    try:
+        stored_session = load_session()
+    except SessionStoreError:
         _report(
             progress,
-            device_session.message
-            or f"Abre {device_session.verification_uri} e introduce el código {device_session.user_code}.",
+            "No se pudo recuperar la sesión cifrada. Se solicitará iniciar sesión de nuevo.",
+        )
+        _discard_saved_session(progress)
+        stored_session = None
+
+    if stored_session is not None:
+        _report(progress, f"Renovando la sesión guardada de {stored_session.username}...")
+        try:
+            ms_token = refresh_microsoft_token(client_id, stored_session.refresh_token)
+        except microsoft.MicrosoftAuthError as exc:
+            if exc.error_code not in _AUTH_ERRORS_REQUIRING_INTERACTIVE_LOGIN:
+                raise RuntimeError(
+                    "No se pudo renovar la sesión Microsoft. Comprueba tu conexión e inténtalo de nuevo. "
+                    "No se abrirá el navegador automáticamente ante un posible fallo de red."
+                ) from exc
+            _report(
+                progress,
+                "La sesión guardada caducó o fue revocada. Hace falta iniciar sesión de nuevo.",
+            )
+            _discard_saved_session(progress)
+            ms_token = _start_interactive_login(
+                client_id,
+                progress=progress,
+                authentication_code=authentication_code,
+                cancel_event=cancel_event,
+            )
+        else:
+            # Persist a rotated refresh token immediately, before contacting
+            # Xbox/Minecraft, so a later downstream failure does not lose it.
+            if ms_token.refresh_token:
+                try:
+                    save_session(
+                        ms_token.refresh_token,
+                        stored_session.username,
+                        stored_session.uuid,
+                    )
+                except SessionStoreError:
+                    _report(
+                        progress,
+                        "Aviso: no se pudo actualizar el archivo de sesión segura. "
+                        "La renovación funcionó, pero quizá debas iniciar sesión de nuevo más adelante.",
+                    )
+            _report(progress, "Sesión Microsoft renovada sin abrir el navegador.")
+    else:
+        ms_token = _start_interactive_login(
+            client_id,
+            progress=progress,
+            authentication_code=authentication_code,
+            cancel_event=cancel_event,
         )
 
-    def authentication_progress(message: str) -> None:
-        # poll_device_code calls this callback while waiting, allowing cancellation
-        # to be noticed without duplicating Microsoft authentication logic.
-        _check_cancelled(cancel_event)
-        _report(progress, message)
-
-    ms_token = microsoft.poll_device_code(
-        client_id,
-        device_session,
-        progress=authentication_progress,
-    )
     _check_cancelled(cancel_event)
-    _report(progress, "Microsoft: cuenta verificada.")
-
     _report(progress, "Verificando Xbox Live, XSTS y la licencia de Minecraft...")
     account = microsoft.finish_minecraft_login(ms_token)
     _check_cancelled(cancel_event)
@@ -224,6 +340,7 @@ def launch_minecraft(
             "La cuenta Microsoft no tiene una licencia válida de Minecraft: Java Edition."
         )
     _report(progress, f"Cuenta verificada: {account.username} · licencia válida.")
+    _save_verified_session(ms_token, account, progress)
 
     xuid = _get_xuid(ms_token.access_token)
     _check_cancelled(cancel_event)
@@ -252,5 +369,8 @@ def launch_minecraft(
     except OSError as exc:
         raise RuntimeError(f"No se pudo ejecutar Java para Minecraft {version_id}: {exc}") from exc
 
-    _report(progress, f"Minecraft se inició (PID {process.pid}). Los tokens no se han guardado en archivos.")
+    _report(
+        progress,
+        f"Minecraft se inició (PID {process.pid}). Los tokens de acceso no se guardan en texto claro.",
+    )
     return process

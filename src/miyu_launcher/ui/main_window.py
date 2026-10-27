@@ -18,6 +18,12 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from miyu_launcher.auth.session_store import (
+    SessionStoreError,
+    clear_saved_session,
+    has_saved_session_file,
+    load_session,
+)
 from miyu_launcher.core.game_launcher import LaunchCancelled, launch_minecraft
 from miyu_launcher.core.java import find_java_installations, select_java
 from miyu_launcher.core.minecraft import MinecraftInstallation, MinecraftVersion, find_default_minecraft_installation
@@ -131,6 +137,22 @@ class MainWindow(QMainWindow):
         self.java_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         self.java_label.setWordWrap(True)
 
+        self.account_label = QLabel()
+        self.account_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.account_label.setWordWrap(True)
+        self.account_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+
+        self.logout_button = QPushButton("CERRAR SESIÓN")
+        self.logout_button.setFixedHeight(34)
+        self.logout_button.clicked.connect(self._logout_saved_session)
+        self.logout_button.hide()
+
+        account_row = QHBoxLayout()
+        account_row.addStretch()
+        account_row.addWidget(self.account_label, 2)
+        account_row.addWidget(self.logout_button)
+        account_row.addStretch()
+
         version_title = QLabel("VERSIÓN DE MINECRAFT")
         version_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         version_title.setStyleSheet("font-weight: 600; letter-spacing: 1px;")
@@ -193,6 +215,7 @@ class MainWindow(QMainWindow):
         layout.addSpacing(12)
         layout.addWidget(system_label)
         layout.addWidget(self.java_label)
+        layout.addLayout(account_row)
         layout.addSpacing(16)
         layout.addWidget(version_title)
         layout.addLayout(version_row)
@@ -210,6 +233,66 @@ class MainWindow(QMainWindow):
 
         self.version_combo.currentIndexChanged.connect(self._on_version_changed)
         self._populate_versions()
+        self._refresh_saved_account_status()
+
+    def _refresh_saved_account_status(self) -> None:
+        try:
+            session = load_session()
+        except SessionStoreError:
+            self.account_label.setText(
+                "La sesión guardada no se puede leer. Puedes eliminarla y conectar la cuenta de nuevo."
+            )
+            self.logout_button.setText("ELIMINAR SESIÓN")
+            self.logout_button.setVisible(has_saved_session_file())
+            return
+
+        if session is None:
+            self.account_label.setText(
+                "Cuenta Microsoft: se solicitará iniciar sesión cuando pulses JUGAR."
+            )
+            self.logout_button.hide()
+            self.logout_button.setText("CERRAR SESIÓN")
+            return
+
+        self.account_label.setText(
+            f"Cuenta vinculada: {session.username}  ·  sesión protegida por Windows en este equipo"
+        )
+        self.logout_button.setText("CERRAR SESIÓN")
+        self.logout_button.show()
+
+    def _logout_saved_session(self) -> None:
+        worker = self._launch_worker
+        if (worker is not None and worker.isRunning()) or (
+            self._game_process is not None and self._game_process.poll() is None
+        ):
+            return
+        if not has_saved_session_file():
+            self._refresh_saved_account_status()
+            return
+
+        answer = QMessageBox.question(
+            self,
+            "Cerrar sesión",
+            "Se eliminará de este equipo la sesión guardada de MiyuLauncher. "
+            "La próxima vez que pulses JUGAR tendrás que iniciar sesión de nuevo.\n\n"
+            "Esto no elimina tu cuenta Microsoft ni revoca por sí solo los tokens en los servidores de Microsoft.\n\n"
+            "¿Quieres continuar?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+
+        try:
+            clear_saved_session()
+        except SessionStoreError as exc:
+            QMessageBox.critical(self, "No se pudo cerrar sesión", str(exc))
+            return
+
+        self._refresh_saved_account_status()
+        self.status_label.setText(
+            "Sesión guardada eliminada de este equipo. Inicia sesión la próxima vez que pulses JUGAR."
+        )
 
     def _populate_versions(self) -> None:
         self.version_combo.clear()
@@ -286,6 +369,7 @@ class MainWindow(QMainWindow):
         self.progress_bar.show()
         self.cancel_button.setEnabled(True)
         self.cancel_button.show()
+        self.logout_button.setEnabled(False)
 
         worker = _LaunchWorker(version_id, self)
         self._launch_worker = worker
@@ -333,6 +417,8 @@ class MainWindow(QMainWindow):
         self.version_combo.setEnabled(False)
         self.progress_bar.hide()
         self.status_label.setText(f"Minecraft se inició correctamente (PID {process.pid}).")
+        self._refresh_saved_account_status()
+        self.logout_button.setEnabled(False)
         self._process_timer.start()
 
     def _on_launch_failed(self, message: str) -> None:
@@ -341,6 +427,7 @@ class MainWindow(QMainWindow):
         self.authentication_code_label.hide()
         self.cancel_button.hide()
         QMessageBox.critical(self, "Error al iniciar Minecraft", message)
+        self._refresh_saved_account_status()
         self.play_button.setText("JUGAR")
         self.play_button.setEnabled(self.version_combo.count() > 0)
         self.version_combo.setEnabled(self.version_combo.count() > 0)
@@ -356,10 +443,12 @@ class MainWindow(QMainWindow):
         if worker is not None:
             worker.deleteLater()
 
+        self._refresh_saved_account_status()
         if self._game_process is None:
             self.progress_bar.hide()
             self.cancel_button.hide()
             self.cancel_button.setEnabled(True)
+            self.logout_button.setEnabled(True)
             self.play_button.setText("JUGAR")
             self.play_button.setEnabled(self.version_combo.count() > 0)
             self.version_combo.setEnabled(self.version_combo.count() > 0)
@@ -378,6 +467,7 @@ class MainWindow(QMainWindow):
 
         self._process_timer.stop()
         self._game_process = None
+        self.logout_button.setEnabled(True)
         self.play_button.setText("JUGAR")
         self.play_button.setEnabled(self.version_combo.count() > 0)
         self.version_combo.setEnabled(self.version_combo.count() > 0)
